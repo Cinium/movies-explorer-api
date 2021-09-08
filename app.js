@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { errors, celebrate, Joi } = require('celebrate');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const usersRouter = require('./routes/users');
 const moviesRouter = require('./routes/movies');
@@ -23,10 +25,19 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
     useUnifiedTopology: true,
 });
 
+const limiter = rateLimit({
+    windowMs: 60000,
+    max: 100,
+});
+
 const { PORT = 8000 } = process.env;
 const app = express();
 
+app.use(helmet());
+
 app.use(requestLogger);
+
+app.use(limiter);
 
 app.use(express.json());
 app.use(cookieParser());
