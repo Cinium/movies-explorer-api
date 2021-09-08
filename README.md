@@ -2,4 +2,4 @@
 
 **Бэкенд дипломной работы на Яндекс.Практикуме**
 
-[api.domain404.nomoredomains.club](api.domain404.nomoredomains.club)
+Домен бэкенда — api.domain404.nomoredomains.club
