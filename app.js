@@ -1,85 +1,35 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const { errors, celebrate, Joi } = require('celebrate');
+const { errors } = require('celebrate');
+const mongoose = require('mongoose');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-
-const usersRouter = require('./routes/users');
-const moviesRouter = require('./routes/movies');
-
-const { login, register, logout } = require('./controllers/users');
-const NotFoundError = require('./errors/NotFoundError');
-
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { limiter, dbAddress, dbConfig } = require('./configs/configs');
+const routers = require('./routes/index');
 const errorHandler = require('./middlewares/errorHandler');
-const auth = require('./middlewares/auth');
-const {
-    requestLogger,
-    errorLogger,
-} = require('./middlewares/logger');
-
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useUnifiedTopology: true,
-});
-
-const limiter = rateLimit({
-    windowMs: 60000,
-    max: 100,
-});
 
 const { PORT = 8000 } = process.env;
 const app = express();
 
-app.use(helmet());
+mongoose.connect(dbAddress, dbConfig);
 
 app.use(requestLogger);
 
+app.use(helmet());
 app.use(limiter);
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.post(
-    '/signin',
-    celebrate({
-        body: Joi.object().keys({
-            email: Joi.string().required().email(),
-            password: Joi.string().required(),
-        }),
-    }),
-    login
-);
-app.post(
-    '/signup',
-    celebrate({
-        body: Joi.object().keys({
-            email: Joi.string().required().email(),
-            password: Joi.string().required(),
-            name: Joi.string().min(2).max(30),
-        }),
-    }),
-    register
-);
-app.delete('/signout', logout);
-
-app.use(auth);
-
-app.use('/users', usersRouter);
-app.use('/movies', moviesRouter);
+app.use('/', routers);
 
 app.use(errorLogger);
 
-app.use((req, res, next) => {
-    next(new NotFoundError('Маршрут не найден'));
-});
-
 app.use(errors());
-
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-    console.log(`Port ${PORT} is working`);
+  // eslint-disable-next-line no-console
+  console.log(`Port ${PORT} is working`);
 });
