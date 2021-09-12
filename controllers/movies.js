@@ -1,14 +1,14 @@
 const Movie = require('../models/movie');
 
-const BadRequest = require('../errors/BadRequest');
+const BadRequestError = require('../errors/BadRequestError');
 const NotFoundError = require('../errors/NotFoundError');
-const Forbidden = require('../errors/Forbidden');
+const ForbiddenError = require('../errors/ForbiddenError');
 
 const getSavedMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
     .then((movies) => {
       if (!movies) {
-        throw new BadRequest('Переданы неверные данные');
+        throw new BadRequestError('Переданы неверные данные');
       }
       res.send(movies);
     })
@@ -60,7 +60,7 @@ const deleteMovie = (req, res, next) => {
         throw new NotFoundError('Фильм не найден');
       }
       if (!movie.owner.equals(userId)) {
-        throw new Forbidden(
+        throw new ForbiddenError(
           'Фильмы может удалять только их владелец',
         );
       }
@@ -72,7 +72,7 @@ const deleteMovie = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequest('Неверный ID фильма');
+        throw new BadRequestError('Неверный ID фильма');
       }
       next(err);
     })

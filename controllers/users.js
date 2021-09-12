@@ -2,15 +2,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { jwtSecret } = require('../configs/configs');
-const BadRequest = require('../errors/BadRequest');
-const Unauthorized = require('../errors/Unauthorized');
-const Conflict = require('../errors/Conflict');
+const BadRequestError = require('../errors/BadRequestError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+const ConflictError = require('../errors/ConflictError');
 
 const getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new BadRequest('Переданы неверные данные');
+        throw new BadRequestError('Переданы неверные данные');
       }
       res.send(user);
     })
@@ -31,13 +31,13 @@ const changeUserInfo = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.codeName === 'DuplicateKey') {
-        throw new Conflict('Такой email уже существует');
+        throw new ConflictError('Такой email уже существует');
       }
       if (err.name === 'ValidationError') {
-        throw new BadRequest('Переданы некорректные данные');
+        throw new BadRequestError('Переданы некорректные данные');
       }
       if (err.name === 'CastError') {
-        throw new Unauthorized('Пользователь не найден');
+        throw new UnauthorizedError('Пользователь не найден');
       }
       next(err);
     })
@@ -48,7 +48,7 @@ const register = (req, res, next) => {
   const { name, email, password } = req.body;
 
   if (!email || !password) {
-    throw new BadRequest('Отсутсвует почта или пароль');
+    throw new BadRequestError('Отсутсвует почта или пароль');
   }
 
   bcrypt
@@ -61,10 +61,10 @@ const register = (req, res, next) => {
     .then((user) => res.status(201).send({ data: user.toJSON() }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequest('Переданы некорректные данные');
+        throw new BadRequestError('Переданы некорректные данные');
       }
       if (err.name === 'MongoError' && err.code === 11000) {
-        throw new Conflict('Такой email уже существует');
+        throw new ConflictError('Такой email уже существует');
       }
       next(err);
     })
@@ -76,14 +76,14 @@ const login = (req, res, next) => {
   let userId;
 
   if (!email || !password) {
-    throw new BadRequest('Отсутсвует почта или пароль');
+    throw new BadRequestError('Отсутсвует почта или пароль');
   }
 
   User.findOne({ email })
     .select('+password')
     .then((user) => {
       if (!user) {
-        throw new Unauthorized('Неправильные почта или пароль');
+        throw new UnauthorizedError('Неправильные почта или пароль');
       }
       userId = user._id;
 
@@ -91,7 +91,7 @@ const login = (req, res, next) => {
     })
     .then((matched) => {
       if (!matched) {
-        throw new Unauthorized('Неправильные почта или пароль');
+        throw new UnauthorizedError('Неправильные почта или пароль');
       }
 
       const token = jwt.sign(
@@ -115,7 +115,7 @@ const login = (req, res, next) => {
 
 const logout = (req, res) => {
   if (!req.cookies.jwt) {
-    throw new Unauthorized('Некого разлогинивать');
+    throw new UnauthorizedError('Некого разлогинивать');
   }
 
   const token = req.cookies.jwt;
