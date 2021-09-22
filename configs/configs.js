@@ -19,8 +19,8 @@ const limiter = rateLimit({
 });
 
 const allowedOrigins = [
-  'https://domainnotfound.nomoredomains.monster',
-  'http://domainnotfound.nomoredomains.monster',
+  'https://domain404.nomoredomains.club',
+  'http://domain404.nomoredomains.club',
   'http://localhost:3001',
 ];
 const corsOptions = {
