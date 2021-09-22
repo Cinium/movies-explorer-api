@@ -1,16 +1,21 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const { limiter, dbAddress, dbConfig } = require('./configs/configs');
+const {
+  limiter, dbAddress, dbConfig, corsOptions,
+} = require('./configs/configs');
 const routers = require('./routes/index');
 const errorHandler = require('./middlewares/errorHandler');
 
 const { PORT = 8000 } = process.env;
 const app = express();
+
+app.set('trust proxy', 1);
 
 mongoose.connect(dbAddress, dbConfig);
 
@@ -18,6 +23,9 @@ app.use(requestLogger);
 
 app.use(helmet());
 app.use(limiter);
+
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());

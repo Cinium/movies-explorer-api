@@ -18,9 +18,25 @@ const limiter = rateLimit({
   max: 100,
 });
 
+const allowedOrigins = [
+  'https://domainnotfound.nomoredomains.monster',
+  'http://domainnotfound.nomoredomains.monster',
+  'http://localhost:3001',
+];
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Content-Type,Authorization',
+  credentials: true,
+};
+
 const jwtSecret = NODE_ENV === 'production' ? JWT_SECRET : jwtDevSecret;
 const dbAddress = NODE_ENV === 'production' ? DB_ADDRESS : dbDevAddress;
 
 module.exports = {
-  dbConfig, dbAddress, limiter, jwtSecret,
+  dbConfig,
+  dbAddress,
+  limiter,
+  jwtSecret,
+  corsOptions,
 };
