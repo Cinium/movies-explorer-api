@@ -28,7 +28,7 @@ const changeUserInfo = (req, res, next) => {
       runValidators: true,
     },
   )
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.codeName === 'DuplicateKey') {
         throw new ConflictError('Такой email уже существует');
@@ -58,7 +58,7 @@ const register = (req, res, next) => {
       password: hash,
       name,
     }))
-    .then((user) => res.status(201).send({ data: user.toJSON() }))
+    .then((user) => res.status(201).send(user.toJSON()))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные');
@@ -74,6 +74,7 @@ const register = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
   let userId;
+  let userData;
 
   if (!email || !password) {
     throw new BadRequestError('Отсутсвует почта или пароль');
@@ -86,6 +87,7 @@ const login = (req, res, next) => {
         throw new UnauthorizedError('Неправильные почта или пароль');
       }
       userId = user._id;
+      userData = user;
 
       return bcrypt.compare(password, user.password);
     })
@@ -108,7 +110,7 @@ const login = (req, res, next) => {
           sameSite: true,
         })
         .status(200)
-        .send({ _id: userId });
+        .send(userData);
     })
     .catch((err) => next(err));
 };

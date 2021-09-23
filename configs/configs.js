@@ -21,7 +21,10 @@ const limiter = rateLimit({
 const allowedOrigins = [
   'https://domain404.nomoredomains.club',
   'http://domain404.nomoredomains.club',
+  'http://localhost:3000',
   'http://localhost:3001',
+  'https://localhost:3000',
+  'https://localhost:3001',
 ];
 const corsOptions = {
   origin: allowedOrigins,
