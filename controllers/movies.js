@@ -18,30 +18,30 @@ const getSavedMovies = (req, res, next) => {
 const createMovie = (req, res, next) => {
   const {
     country,
+    description,
     director,
     duration,
-    year,
-    description,
-    image,
-    trailer,
-    nameRU,
-    nameEN,
-    thumbnail,
     movieId,
+    image,
+    nameEN,
+    nameRU,
+    trailer,
+    year,
+    thumbnail,
   } = req.body;
 
   Movie.create({
     country,
+    description,
     director,
     duration,
-    year,
-    description,
-    image,
-    trailer,
-    nameRU,
-    nameEN,
-    thumbnail,
     movieId,
+    image,
+    nameEN,
+    nameRU,
+    trailer,
+    year,
+    thumbnail,
     owner: req.user._id,
   })
     .then((movie) => {
@@ -54,22 +54,21 @@ const deleteMovie = (req, res, next) => {
   const userId = req.user._id;
   const { movieId } = req.params;
 
-  Movie.findById(movieId)
+  Movie.findOneAndDelete({ movieId, owner: userId })
     .then((movie) => {
       if (!movie) {
         throw new NotFoundError('Фильм не найден');
       }
       if (!movie.owner.equals(userId)) {
-        throw new ForbiddenError(
-          'Фильмы может удалять только их владелец',
-        );
+        throw new ForbiddenError('Фильмы может удалять только их владелец');
       }
 
-      return Movie.findByIdAndRemove(movieId);
+      // return Movie.findByIdAndRemove(movieId);
+      res.status(200).send({ deleted: movie.movieId });
     })
-    .then((movie) => {
-      res.status(200).send(movie);
-    })
+    // .then((movie) => {
+    //   res.status(200).send(movie);
+    // })
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new BadRequestError('Неверный ID фильма');
