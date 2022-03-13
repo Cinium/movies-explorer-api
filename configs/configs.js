@@ -19,6 +19,7 @@ const limiter = rateLimit({
 });
 
 const allowedOrigins = [
+  'https://praktikum-movies-explorer.herokuapp.com',
   'https://domain404.nomoredomains.club',
   'http://domain404.nomoredomains.club',
   'http://localhost:3000',
